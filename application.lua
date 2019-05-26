@@ -81,7 +81,7 @@ function sendReq(reqdata, s, port, ip)
     for k,v in pairs(t) do 
         str = str..string.char(v)
     end
-    for k, v in pairs(writeUInt32LE(crc32.xcrc32(str))) do 
+    for k, v in pairs(writeUInt32LE(crc32.hash(str))) do 
         t[7+k] = v;
     end
     local str = "";
@@ -104,7 +104,7 @@ function decodeData(data, s, port, ip)
         -- checkcrc
         print(receivedCrc)
         setStr(data,index,{0x00,0x00,0x00,0x00})
-        print(crc32.xcrc32(data))
+        print(crc32.hash(data))
         index = index + 4;
         
         -- checkcrc

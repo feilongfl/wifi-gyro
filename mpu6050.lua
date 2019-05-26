@@ -14,8 +14,8 @@ function readMpu()
     print(string.format(
             "ax = %d, ay = %d, az = %d, temp = %d, gx = %d, gy = %d, gz = %d", 
             ax, ay, az, temp, gx, gy, gz))
-            
-    mputimer:start()
+           
+    mputimer:start()            
 end
 
 packageNum = 0;
@@ -57,5 +57,5 @@ end
 if mputimer == nil then 
     mputimer = tmr.create()
 end
-mputimer:alarm(100, tmr.ALARM_SEMI, sendmpu)
+mputimer:alarm(100, tmr.ALARM_SEMI, readMpu)
 
