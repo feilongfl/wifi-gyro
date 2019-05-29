@@ -49,7 +49,7 @@ function sendmpu()
     for k, v in pairs(writeFloatLE(gy / 32763)) do reqTable[#reqTable + 1] = v; end
     for k, v in pairs(writeFloatLE(gz / 32763)) do reqTable[#reqTable + 1] = v; end
     -- timeDebug("1")
-    sendReq(reqTable, lastRequestSockets, lastRequestPORT, lastRequestIP);
+    sendReq2(reqTable, lastRequestSockets, lastRequestPORT, lastRequestIP);
     -- timeDebug("2")
     packageNum = packageNum + 1
     mputimer:start()

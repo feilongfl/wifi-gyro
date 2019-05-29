@@ -80,6 +80,47 @@ function sendReq(reqdata, s, port, ip)
     -- timeDebug("8")
 end
 
+function sendReq2(reqdata, s, port, ip)
+    -- protocal start
+    -- timeDebug("3")
+    local t = {"D", "S", "U", "S"}; -- head
+    for k, v in pairs(writeUInt16LE(maxProtocolVer)) do table.insert(t, v); end -- ver
+    for k, v in pairs(writeUInt16LE(#reqdata)) do table.insert(t, v); end -- length
+    for k, v in pairs(writeUInt32LE(0x00000000)) do table.insert(t, v); end -- index
+    for k, v in pairs(writeUInt32LE(serverID)) do table.insert(t, v); end -- id
+    for k,v in pairs(reqdata) do -- data
+        table.insert(t, v)
+    end
+    -- timeDebug("4")
+    --print("-------------------------------")
+    -- local str = ByteTableToString(t)
+    -- local str = table.concat(t)
+    local strPoint = buffer.fromTable(#t, t)
+    -- for k,v in pairs(t) do 
+    --     buffer.set(strPoint, k - 1, v)
+    -- end
+    local str = buffer.toString(strPoint, #t)
+    buffer.free(strPoint)
+    -- timeDebug("5")
+    --print("-------------------------------")
+    --print("crc[",str,"](", #reqdata, ",", #t, ",", #str,") to [",ip,":",port,"]")
+    local crc = {}
+    for k, v in pairs(writeUInt32LE(crc32.hash(str))) do -- crc
+      --  print(k, string.format("%X",v))
+        t[k + 8] = v
+        crc[#crc + 1] = string.char(v)
+    end
+    -- timeDebug("6")
+    -- protocal fin
+    str = replace_char(9, str, table.concat(crc))
+    -- print("send[",str,"](", #reqdata, ",", #t, ",", #str,") to [",ip,":",port,"]")
+    -- timeDebug("7")
+    if ip ~= nil then
+        s:send(port, ip, str);
+    end
+    -- timeDebug("8")
+end
+
 reqTable = {}
 
 function decodeData(data, s, port, ip)
