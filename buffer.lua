@@ -9,19 +9,13 @@ function readUInt32LE(data, offset)
 end
 
 function writeUInt16LE(data)
-    local t = {};
-    for i = 0,1 do
-        t[i + 1] = bit.band(0xff,bit.rshift(data, 8*i));
-    end
-    return t
+    a,b = number.fromUint16ToBytes(data)
+    return {b,a};
 end
 
 function writeUInt32LE(data)
-    local t = {};
-    for i = 0,3 do
-        t[i + 1] = bit.band(0xff,bit.rshift(data, 8*i));
-    end
-    return t
+    a,b,c,d = number.fromUint32ToBytes(data)
+    return {d,c,b,a}
 end
 
 function writeFloatLE(data)

@@ -15,6 +15,7 @@ packageNum = 0;
 
 function sendmpu()
     local ax,ay,az,temp,gx,gy,gz = mpu6050.read()
+    uart.write(0, ".")
     -- print(string.format(
     --         "ax = %d, ay = %d, az = %d, temp = %d, gx = %d, gy = %d, gz = %d", 
     --         ax, ay, az, temp, gx, gy, gz))
@@ -51,11 +52,15 @@ function sendmpu()
     sendReq(reqTable, lastRequestSockets, lastRequestPORT, lastRequestIP);
 
     packageNum = packageNum + 1
-    mputimer:start()
+    -- mputimer:start()
 end
 
-if mputimer == nil then 
-    mputimer = tmr.create()
+-- if mputimer == nil then 
+--     mputimer = tmr.create()
+-- end
+-- mputimer:alarm(10, tmr.ALARM_SEMI, sendmpu)
+
+while true do 
+    sendmpu()
 end
-mputimer:alarm(10, tmr.ALARM_SEMI, sendmpu)
 

@@ -58,7 +58,7 @@ function sendReq(reqdata, s, port, ip)
     end
     --print("-------------------------------")
     for k,v in pairs(t) do -- pre crc
-     --   print(k, string.format("%X",v))
+        -- print(k, string.format("%X",v))
         str = str..string.char(v)
     end
     --print("-------------------------------")
