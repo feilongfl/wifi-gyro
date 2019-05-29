@@ -46,7 +46,6 @@ function setStr(data, offset, val)
 end
 
 function sendReq(reqdata, s, port, ip)
-    local str = "";
     -- protocal start
     local t = {string.byte("DSUS",1,4)}; -- head
     for k, v in pairs(writeUInt16LE(maxProtocolVer)) do table.insert(t, v); end -- ver
@@ -57,28 +56,26 @@ function sendReq(reqdata, s, port, ip)
         table.insert(t, v)
     end
     --print("-------------------------------")
-    for k,v in pairs(t) do -- pre crc
-        -- print(k, string.format("%X",v))
-        str = str..string.char(v)
-    end
+    local str = table.concat(t)
+
     --print("-------------------------------")
     --print("crc[",str,"](", #reqdata, ",", #t, ",", #str,") to [",ip,":",port,"]")
     for k, v in pairs(writeUInt32LE(crc32.hash(str))) do -- crc
       --  print(k, string.format("%X",v))
         t[k + 8] = v
     end
+
     -- protocal fin
-    str = ""
-    for k,v in pairs(t) do 
-      --  print(k, string.format("%X",v))
-        str = str..string.char(v)
-    end
-    
+    str = table.concat(t)
+
     -- print("send[",str,"](", #reqdata, ",", #t, ",", #str,") to [",ip,":",port,"]")
     if ip ~= nil then
         s:send(port, ip, str);
     end
+
 end
+
+reqTable = {}
 
 function decodeData(data, s, port, ip)
     -- print("recv[",data,"] from [",ip,":",port,"]")

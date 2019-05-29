@@ -14,3 +14,10 @@ function debugMsg(msg)
         print(msg);
     end
 end
+
+ta = tmr.now()
+function timeDebug(msg)
+    tb = tmr.now()
+    print(tb, msg, tb - ta)
+    ta = tmr.now()
+end
