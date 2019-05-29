@@ -48,9 +48,9 @@ function sendmpu()
     for k, v in pairs(writeFloatLE(gx / 32763)) do reqTable[#reqTable + 1] = v; end
     for k, v in pairs(writeFloatLE(gy / 32763)) do reqTable[#reqTable + 1] = v; end
     for k, v in pairs(writeFloatLE(gz / 32763)) do reqTable[#reqTable + 1] = v; end
-    timeDebug("1")
+    -- timeDebug("1")
     sendReq(reqTable, lastRequestSockets, lastRequestPORT, lastRequestIP);
-    timeDebug("2")
+    -- timeDebug("2")
     packageNum = packageNum + 1
     mputimer:start()
 end
@@ -58,4 +58,4 @@ end
 if mputimer == nil then 
     mputimer = tmr.create()
 end
-mputimer:alarm(10, tmr.ALARM_SEMI, sendmpu)
+mputimer:alarm(1, tmr.ALARM_SEMI, sendmpu)

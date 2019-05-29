@@ -28,7 +28,8 @@ function replace_char(pos, str, r)
 end
 
 function table_insert_byte(t, v)
-    table.insert(t, string.char(v))
+    -- table.insert(t, string.char(v))
+    t[#t + 1] = string.char(v)
 end
 
 function ByteTableToString(t)

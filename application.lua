@@ -47,7 +47,7 @@ end
 
 function sendReq(reqdata, s, port, ip)
     -- protocal start
-    timeDebug("3")
+    -- timeDebug("3")
     local t = {"D", "S", "U", "S"}; -- head
     for k, v in pairs(writeUInt16LE(maxProtocolVer)) do table_insert_byte(t, v); end -- ver
     for k, v in pairs(writeUInt16LE(#reqdata)) do table_insert_byte(t, v); end -- length
@@ -56,11 +56,11 @@ function sendReq(reqdata, s, port, ip)
     for k,v in pairs(reqdata) do -- data
         table_insert_byte(t, v)
     end
-    timeDebug("4")
+    -- timeDebug("4")
     --print("-------------------------------")
     -- local str = ByteTableToString(t)
     local str = table.concat(t)
-    timeDebug("5")
+    -- timeDebug("5")
     --print("-------------------------------")
     --print("crc[",str,"](", #reqdata, ",", #t, ",", #str,") to [",ip,":",port,"]")
     local crc = {}
@@ -69,15 +69,15 @@ function sendReq(reqdata, s, port, ip)
         t[k + 8] = v
         crc[#crc + 1] = string.char(v)
     end
-    timeDebug("6")
+    -- timeDebug("6")
     -- protocal fin
     str = replace_char(9, str, table.concat(crc))
     -- print("send[",str,"](", #reqdata, ",", #t, ",", #str,") to [",ip,":",port,"]")
-    timeDebug("7")
+    -- timeDebug("7")
     if ip ~= nil then
         s:send(port, ip, str);
     end
-timeDebug("8")
+    -- timeDebug("8")
 end
 
 reqTable = {}
