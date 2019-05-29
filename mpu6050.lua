@@ -19,7 +19,7 @@ function sendmpu()
     --         "ax = %d, ay = %d, az = %d, temp = %d, gx = %d, gy = %d, gz = %d", 
     --         ax, ay, az, temp, gx, gy, gz))
     -- print("--------")
-    -- ta = tmr.now()
+    timeDebug("mpu6050")
     reqTable = writeUInt32LE(DSUC_PadDataReq);
     reqTable[#reqTable + 1] = 0x00; -- pad id
     reqTable[#reqTable + 1] = 0x02; -- state (connected)
@@ -48,13 +48,9 @@ function sendmpu()
     for k, v in pairs(writeFloatLE(gx / 32763)) do reqTable[#reqTable + 1] = v; end
     for k, v in pairs(writeFloatLE(gy / 32763)) do reqTable[#reqTable + 1] = v; end
     for k, v in pairs(writeFloatLE(gz / 32763)) do reqTable[#reqTable + 1] = v; end
-    -- tb = tmr.now()
-    -- print(ta,",",tb," -> ",tb - ta)
-    -- ta = tmr.now()
+    timeDebug("1")
     sendReq(reqTable, lastRequestSockets, lastRequestPORT, lastRequestIP);
-    -- tb = tmr.now()
-    -- print(ta,",",tb," -> ",tb - ta)
-    -- ta = tmr.now()
+    timeDebug("2")
     packageNum = packageNum + 1
     mputimer:start()
 end

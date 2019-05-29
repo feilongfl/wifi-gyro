@@ -22,3 +22,19 @@ function writeFloatLE(data)
     a,b,c,d = float.fromFloattoByteArray(data)
     return {d,c,b,a}
 end
+
+function replace_char(pos, str, r)
+    return str:sub(1, pos-1) .. r .. str:sub(pos+r:len())
+end
+
+function table_insert_byte(t, v)
+    table.insert(t, string.char(v))
+end
+
+function ByteTableToString(t)
+    local tt = {}
+    for _,v in pairs(t) do 
+        tt[#tt + 1] = string.char(v)
+    end
+    return table.concat(tt)
+end
