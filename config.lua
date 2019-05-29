@@ -8,5 +8,9 @@ IICID=0
 IICSDA=2
 IICSCL=1
 MPUADDR=0x68
-i2c.setup(IICID, IICSDA, IICSCL, i2c.SLOW)
-mpu6050.setup()
+
+function debugMsg(msg)
+    if DEBUGMSG == true then
+        print(msg);
+    end
+end
