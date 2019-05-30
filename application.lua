@@ -92,15 +92,7 @@ function sendReq2(reqdata, s, port, ip)
         table.insert(t, v)
     end
     -- timeDebug("4")
-    --print("-------------------------------")
-    -- local str = ByteTableToString(t)
-    -- local str = table.concat(t)
-    local strPoint = buffer.fromTable(#t, t)
-    -- for k,v in pairs(t) do 
-    --     buffer.set(strPoint, k - 1, v)
-    -- end
-    local str = buffer.toString(strPoint, #t)
-    buffer.free(strPoint)
+    local str = table.serial(t)
     -- timeDebug("5")
     --print("-------------------------------")
     --print("crc[",str,"](", #reqdata, ",", #t, ",", #str,") to [",ip,":",port,"]")
@@ -112,7 +104,8 @@ function sendReq2(reqdata, s, port, ip)
     end
     -- timeDebug("6")
     -- protocal fin
-    str = replace_char(9, str, table.concat(crc))
+    -- str = replace_char(9, str, table.concat(crc))
+    str = table.serial(t)
     -- print("send[",str,"](", #reqdata, ",", #t, ",", #str,") to [",ip,":",port,"]")
     -- timeDebug("7")
     if ip ~= nil then
