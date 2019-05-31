@@ -1,6 +1,7 @@
 function Log(level, msg)
-    if(level >= DEBUGLEVEL) then
-        print(string.format("[%s][%d] -> %s", debugLevelMessage[level], tmr.now(), msg));
+    if (level >= DEBUGLEVEL) then
+        print(string.format("[%s][%d] -> %s", debugLevelMessage[level],
+                            tmr.now(), msg))
     end
 end
 

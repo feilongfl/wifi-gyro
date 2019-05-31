@@ -13,7 +13,7 @@ function startup()
     else
         Log(2, "Running")
         file.close("init.lua")
-        
+
         runlua("application")
         runlua("mpu6050")
     end
