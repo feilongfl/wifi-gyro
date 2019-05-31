@@ -44,3 +44,15 @@ function ByteTableToString(t)
     -- return string.char(table.unpack(t))
     return table.serial(t)
 end
+
+function setStr(data, offset, val)
+    local t = {}
+    for i = 1, lastData:len() do t[i], lastData:byte(i) end
+
+    for k, v in pairs(val) do t[offset + k - 1] = v end
+
+    local str = ByteTableToString(t)
+    -- print(str)
+
+    return str
+end

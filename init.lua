@@ -14,8 +14,9 @@ function startup()
         Log(2, "Running")
         file.close("init.lua")
 
-        runlua("application")
         runlua("mpu6050")
+        runlua("cemumotion")
+        runlua("application")
     end
 end
 
