@@ -41,5 +41,6 @@ end
 -- end
 
 function ByteTableToString(t)
-    return string.char(table.unpack(t))
+    -- return string.char(table.unpack(t))
+    return table.serial(t)
 end

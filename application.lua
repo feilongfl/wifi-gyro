@@ -21,7 +21,6 @@ end
 
 function setStr(data, offset, val)
     local t = {};
-    local str = "";
     for i = 1,lastData:len() do
         table.insert(t, lastData:byte(i))
     end
@@ -30,10 +29,7 @@ function setStr(data, offset, val)
         t[offset + k - 1] = v
     end
 
-    for k,v in pairs(t) do 
-        --print(k, string.format("%X",v))
-        str = str..string.char(v)
-    end
+    local str = ByteTableToString(t)
     -- print(str)
     
     return str
@@ -43,50 +39,15 @@ function sendReq(reqdata, s, port, ip)
     -- protocal start
     -- timeDebug("3")
     local t = {"D", "S", "U", "S"}; -- head
-    for k, v in pairs(writeUInt16LE(maxProtocolVer)) do table_insert_byte(t, v); end -- ver
-    for k, v in pairs(writeUInt16LE(#reqdata)) do table_insert_byte(t, v); end -- length
-    for k, v in pairs(writeUInt32LE(0x00000000)) do table_insert_byte(t, v); end -- index
-    for k, v in pairs(writeUInt32LE(serverID)) do table_insert_byte(t, v); end -- id
+    for k, v in pairs(writeUInt16LE(maxProtocolVer)) do t[#t + 1] = v; end -- ver
+    for k, v in pairs(writeUInt16LE(#reqdata)) do t[#t + 1] = v; end -- length
+    for k, v in pairs(writeUInt32LE(0x00000000)) do t[#t + 1] = v; end -- index
+    for k, v in pairs(writeUInt32LE(serverID)) do t[#t + 1] = v; end -- id
     for k,v in pairs(reqdata) do -- data
-        table_insert_byte(t, v)
+        t[#t + 1] = v
     end
     -- timeDebug("4")
-    --print("-------------------------------")
-    -- local str = ByteTableToString(t)
-    local str = table.concat(t)
-    -- timeDebug("5")
-    --print("-------------------------------")
-    --print("crc[",str,"](", #reqdata, ",", #t, ",", #str,") to [",ip,":",port,"]")
-    local crc = {}
-    for k, v in pairs(writeUInt32LE(crc32.hash(str))) do -- crc
-      --  print(k, string.format("%X",v))
-        t[k + 8] = v
-        crc[#crc + 1] = string.char(v)
-    end
-    -- timeDebug("6")
-    -- protocal fin
-    str = replace_char(9, str, table.concat(crc))
-    -- print("send[",str,"](", #reqdata, ",", #t, ",", #str,") to [",ip,":",port,"]")
-    -- timeDebug("7")
-    if ip ~= nil then
-        s:send(port, ip, str);
-    end
-    -- timeDebug("8")
-end
-
-function sendReq2(reqdata, s, port, ip)
-    -- protocal start
-    -- timeDebug("3")
-    local t = {"D", "S", "U", "S"}; -- head
-    for k, v in pairs(writeUInt16LE(maxProtocolVer)) do table.insert(t, v); end -- ver
-    for k, v in pairs(writeUInt16LE(#reqdata)) do table.insert(t, v); end -- length
-    for k, v in pairs(writeUInt32LE(0x00000000)) do table.insert(t, v); end -- index
-    for k, v in pairs(writeUInt32LE(serverID)) do table.insert(t, v); end -- id
-    for k,v in pairs(reqdata) do -- data
-        table.insert(t, v)
-    end
-    -- timeDebug("4")
-    local str = table.serial(t)
+    local str = ByteTableToString(t)
     -- timeDebug("5")
     --print("-------------------------------")
     --print("crc[",str,"](", #reqdata, ",", #t, ",", #str,") to [",ip,":",port,"]")
@@ -99,7 +60,7 @@ function sendReq2(reqdata, s, port, ip)
     -- timeDebug("6")
     -- protocal fin
     -- str = replace_char(9, str, table.concat(crc))
-    str = table.serial(t)
+    str = ByteTableToString(t)
     -- print("send[",str,"](", #reqdata, ",", #t, ",", #str,") to [",ip,":",port,"]")
     -- timeDebug("7")
     if ip ~= nil then
@@ -140,16 +101,16 @@ function decodeData(data, s, port, ip)
             --print("debuggg ---> ", numOfPadRequests)
             --for i = 1,numOfPadRequests do
                 reqTable = writeUInt32LE(DSUS_PortInfo);
-                table.insert(reqTable, 0x00); -- pad id
-                table.insert(reqTable, 0x02); -- state (connected)
-                table.insert(reqTable, 0x02); -- model (generic)
-                table.insert(reqTable, 0x01); -- connection type (usb)
+                reqTable[#reqTable + 1] = 0x00; -- pad id
+                reqTable[#reqTable + 1] = 0x02; -- state (connected)
+                reqTable[#reqTable + 1] = 0x02; -- model (generic)
+                reqTable[#reqTable + 1] = 0x01; -- connection type (usb)
                 for i = 1,5 do -- mac address
-                    table.insert(reqTable, 0x00); 
+                    reqTable[#reqTable + 1] = 0x00; 
                 end
-                table.insert(reqTable, 0xff); -- mac 00:00:00:00:00:FF
-                table.insert(reqTable, 0xef); -- battery (charged)
-                table.insert(reqTable, 0x01); -- is active (true)
+                reqTable[#reqTable + 1] = 0xff; -- mac 00:00:00:00:00:FF
+                reqTable[#reqTable + 1] = 0xef; -- battery (charged)
+                reqTable[#reqTable + 1] = 0x01; -- is active (true)
                 
                 sendReq(reqTable, s, port, ip);
             --end

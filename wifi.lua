@@ -1,16 +1,16 @@
 -- Define WiFi station event callbacks 
 wifi_connect_event = function(T) 
-  print("Connection to AP("..T.SSID..") established!")
-  print("Waiting for IP address...")
+  Log(2, "Connection to AP("..T.SSID..") established!")
+  Log(2, "Waiting for IP address...")
   if disconnect_ct ~= nil then disconnect_ct = nil end  
 end
 
 wifi_got_ip_event = function(T) 
   -- Note: Having an IP address does not mean there is internet access!
   -- Internet connectivity can be determined with net.dns.resolve().    
-  print("Wifi connection is ready! IP address is: "..T.IP)
-  print("Startup will resume momentarily, you have "..WAITTIME.." micro seconds to abort.")
-  print("Waiting...") 
+  Log(2, "Wifi connection is ready! IP address is: "..T.IP)
+  Log(2, "Startup will resume momentarily, you have "..WAITTIME.." micro seconds to abort.")
+  Log(2, "Waiting...") 
   tmr.create():alarm(WAITTIME, tmr.ALARM_SINGLE, startup)
 end
 
@@ -21,13 +21,13 @@ wifi_disconnect_event = function(T)
   end
   -- total_tries: how many times the station will attempt to connect to the AP. Should consider AP reboot duration.
   local total_tries = 75
-  print("\nWiFi connection to AP("..T.SSID..") has failed!")
+  Log(2, "\nWiFi connection to AP("..T.SSID..") has failed!")
 
   --There are many possible disconnect reasons, the following iterates through 
   --the list and returns the string corresponding to the disconnect reason.
   for key,val in pairs(wifi.eventmon.reason) do
     if val == T.reason then
-      print("Disconnect reason: "..val.."("..key..")")
+      Log(2, "Disconnect reason: "..val.."("..key..")")
       break
     end
   end
@@ -38,10 +38,10 @@ wifi_disconnect_event = function(T)
     disconnect_ct = disconnect_ct + 1 
   end
   if disconnect_ct < total_tries then 
-    print("Retrying connection...(attempt "..(disconnect_ct+1).." of "..total_tries..")")
+    Log(2, "Retrying connection...(attempt "..(disconnect_ct+1).." of "..total_tries..")")
   else
     wifi.sta.disconnect()
-    print("Aborting connection to AP!")
+    Log(2, "Aborting connection to AP!")
     disconnect_ct = nil  
   end
 end
@@ -51,7 +51,7 @@ wifi.eventmon.register(wifi.eventmon.STA_CONNECTED, wifi_connect_event)
 wifi.eventmon.register(wifi.eventmon.STA_GOT_IP, wifi_got_ip_event)
 wifi.eventmon.register(wifi.eventmon.STA_DISCONNECTED, wifi_disconnect_event)
 
-print("Connecting to WiFi access point...")
+Log(2, "Connecting to WiFi access point...")
 wifi.sta.sethostname(HOSTNAME);
 wifi.setmode(wifi.STATION)
 wifi.sta.config({ssid=SSID, pwd=PASSWORD})
