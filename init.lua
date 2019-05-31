@@ -1,17 +1,21 @@
 -- load credentials, 'SSID' and 'PASSWORD' declared and initialize in there
 dofile("config.lua")
-dofile("buffer.lua") -- todo
-dofile("wifi.lua")
+dofile("log.lua")
+dofile("compile.lua")
+
+runlua("buffer")
+runlua("wifi")
 
 function startup()
     if file.open("init.lua") == nil then
-        print("init.lua deleted or renamed")
+        Log(4, "init.lua deleted or renamed")
     else
-        print("Running")
+        Log(2, "Running")
         file.close("init.lua")
-        -- the actual application is stored in 'application.lua'
-        
-        dofile("application.lua")
-        dofile("mpu6050.lua")
+
+        runlua("mpu6050")
+        runlua("cemumotion")
+        runlua("application")
     end
 end
+
