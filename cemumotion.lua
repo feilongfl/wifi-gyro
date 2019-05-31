@@ -9,11 +9,11 @@ local maxProtocolVer = 1001
 local serverID = 0x12345678
 
 -- caches
--- local cacheReq = {}
--- local cacheInfo = {}
--- local cacheData = {}
+cacheReq = {}
+cacheInfo = {}
+cacheData = {}
 
-function makeReqPackage(reqdata)
+function makeReqPackage(length, crc)
     local t = {}
     local ti = 1
     for k, v in pairs({"D", "S", "U", "S"}) do
@@ -24,59 +24,65 @@ function makeReqPackage(reqdata)
         t[ti] = v
         ti = ti + 1
     end -- ver
-    for k, v in pairs(writeUInt16LE(#reqdata)) do
+    for k, v in pairs(writeUInt16LE(length)) do
         t[ti] = v
         ti = ti + 1
     end -- length
-    for k, v in pairs(writeUInt32LE(0x00000000)) do
+    for k, v in pairs(writeUInt32LE(crc)) do
         t[ti] = v
         ti = ti + 1
-    end -- index
+    end -- crc
     for k, v in pairs(writeUInt32LE(serverID)) do
         t[ti] = v
         ti = ti + 1
     end -- id
-    for k, v in pairs(reqdata) do -- data
-        t[ti] = v
-        ti = ti + 1
-    end
+
+    -- for k, v in pairs(reqdata) do -- data
+    --     t[ti] = v
+    --     ti = ti + 1
+    -- end
 
     return t
 end
 
--- function genReqPackage(reqdata)
---     if #cacheReq == 0 then
---         cacheReq = makeReqPackage(reqdata)
---     else
---         local ti = 17
---         for k, v in pairs(reqdata) do -- data
---             cacheReq[ti] = v
---             ti = ti + 1
---         end
---     end
---     return cacheReq
--- end
+function genReqPackage(length, crc)
+    if #cacheReq == 0 then
+        cacheReq = makeReqPackage(length, crc)
+    else
+        local ti = 7
+        for k, v in pairs(writeUInt16LE(length)) do
+            cacheReq[ti] = v
+            ti = ti + 1
+        end -- length
+        for k, v in pairs(writeUInt32LE(crc)) do
+            cacheReq[ti] = v
+            ti = ti + 1
+        end -- crc
+    end
+    return cacheReq
+end
 
 function sendReq(reqdata, s, port, ip)
     -- protocal start
     -- timeDebug("3")
-    local t = makeReqPackage(reqdata)
+    genReqPackage(#reqdata, 0)
 
     -- timeDebug("4")
-    local str = ByteTableToString(t)
+    local str = ByteTableToString(cacheReq)..ByteTableToString(reqdata)
     -- timeDebug("5")
     -- print("-------------------------------")
     -- print("crc[",str,"](", #reqdata, ",", #t, ",", #str,") to [",ip,":",port,"]")
-    local crc = {}
-    for k, v in pairs(writeUInt32LE(crc32.hash(str))) do -- crc
+    genReqPackage(#reqdata, crc32.hash(str))
+
+    -- for k, v in pairs(writeUInt32LE(crc32.hash(str))) do -- crc
         --  print(k, string.format("%X",v))
-        t[k + 8] = v
-        crc[#crc + 1] = string.char(v)
-    end
+        -- t[k + 8] = v
+        -- crc[#crc + 1] = string.char(v)
+    -- end
     -- timeDebug("6")
     -- protocal fin
     -- str = replace_char(9, str, table.concat(crc))
-    str = ByteTableToString(t)
+    str = ByteTableToString(cacheReq)..ByteTableToString(reqdata)
     -- print("send[",str,"](", #reqdata, ",", #t, ",", #str,") to [",ip,":",port,"]")
     -- timeDebug("7")
     if ip ~= nil and disconnect_ct ~= nil then s:send(port, ip, str) end
@@ -108,12 +114,9 @@ function makeInfoPackage()
     return reqTable
 end
 
--- function genInfoPackage()
---     if #cacheInfo == 0 then
---         cacheInfo = makeInfoPackage()
---     end
---     return cacheInfo
--- end
+function genInfoPackage()
+    if #cacheInfo == 0 then cacheInfo = makeInfoPackage() end
+end
 
 function decodeData(data, s, port, ip)
     -- print("recv[",data,"] from [",ip,":",port,"]")
@@ -144,9 +147,8 @@ function decodeData(data, s, port, ip)
             index = index + 4
             -- print("debuggg ---> ", numOfPadRequests)
             -- for i = 1,numOfPadRequests do
-            local reqTable = makeInfoPackage()
-
-            sendReq(reqTable, s, port, ip)
+            genInfoPackage()
+            sendReq(cacheInfo, s, port, ip)
             -- end
         elseif msgType == DSUC_PadDataReq then
             Log(1, "pad data req")
@@ -243,54 +245,54 @@ function makeDataPackage(ax, ay, az, gx, gy, gz)
     return reqTable
 end
 
--- function genDataPackage(ax, ay, az, gx, gy, gz)
---     if #cacheData == 0 then
---         cacheData = makeDataPackage(ax, ay, az, gx, gy, gz)
---     else
---         -- package number
---         local index = 17
---         for k, v in pairs(writeUInt32LE(packageNum)) do -- packageNum
---             cacheData[index] = v
---             index = index + 1
---         end
---         -- time
---         index = 53
---         for k, v in pairs(writeUInt32LE(tmr.now())) do
---             cacheData[index] = v
---             index = index + 1
---         end
+function genDataPackage(ax, ay, az, gx, gy, gz)
+    if #cacheData == 0 then
+        cacheData = makeDataPackage(ax, ay, az, gx, gy, gz)
+    else
+        -- package number
+        local index = 17
+        for k, v in pairs(writeUInt32LE(packageNum)) do -- packageNum
+            cacheData[index] = v
+            index = index + 1
+        end
+        -- time
+        index = 53
+        for k, v in pairs(writeUInt32LE(tmr.now())) do
+            cacheData[index] = v
+            index = index + 1
+        end
 
---         -- data
---         index = 61
---         for k, v in pairs(writeFloatLE(ax / 32763)) do
---             cacheData[index] = v
---             index = index + 1
---         end
---         for k, v in pairs(writeFloatLE(ay / 32763)) do
---             cacheData[index] = v
---             index = index + 1
---         end
---         for k, v in pairs(writeFloatLE(az / 32763)) do
---             cacheData[index] = v
---             index = index + 1
---         end
---         for k, v in pairs(writeFloatLE(gx / 32763)) do
---             cacheData[index] = v
---             index = index + 1
---         end
---         for k, v in pairs(writeFloatLE(gy / 32763)) do
---             cacheData[index] = v
---             index = index + 1
---         end
---         for k, v in pairs(writeFloatLE(gz / 32763)) do
---             cacheData[index] = v
---             index = index + 1
---         end
---     end
+        -- data
+        index = 61
+        for k, v in pairs(writeFloatLE(ax / 32763)) do
+            cacheData[index] = v
+            index = index + 1
+        end
+        for k, v in pairs(writeFloatLE(ay / 32763)) do
+            cacheData[index] = v
+            index = index + 1
+        end
+        for k, v in pairs(writeFloatLE(az / 32763)) do
+            cacheData[index] = v
+            index = index + 1
+        end
+        for k, v in pairs(writeFloatLE(gx / 32763)) do
+            cacheData[index] = v
+            index = index + 1
+        end
+        for k, v in pairs(writeFloatLE(gy / 32763)) do
+            cacheData[index] = v
+            index = index + 1
+        end
+        for k, v in pairs(writeFloatLE(gz / 32763)) do
+            cacheData[index] = v
+            index = index + 1
+        end
+    end
 
---     packageNum = packageNum + 1
---     if packageNum == 0xffffffff  then packageNum = 0 end
--- end
+    packageNum = packageNum + 1
+    if packageNum == 0xffffffff then packageNum = 0 end
+end
 
 function sendmpu()
     local ax, ay, az, temp, gx, gy, gz = mpu6050.read()
@@ -300,9 +302,11 @@ function sendmpu()
     -- print("--------")
     timeDebug("mpu6050")
 
-    reqTable = makeDataPackage(ax, ay, az, gx, gy, gz)
+    -- reqTable = makeDataPackage(ax, ay, az, gx, gy, gz)
     -- timeDebug("1")
-    sendReq(reqTable, lastRequestSockets, lastRequestPORT, lastRequestIP)
+    -- sendReq(reqTable, lastRequestSockets, lastRequestPORT, lastRequestIP)
+    genDataPackage(ax, ay, az, gx, gy, gz)
+    sendReq(cacheData, lastRequestSockets, lastRequestPORT, lastRequestIP)
     -- timeDebug("2")
     mputimer:start()
 end

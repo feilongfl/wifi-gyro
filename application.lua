@@ -1,13 +1,5 @@
 lastData = ""
 
--- data type
-DSUC_VersionReq = 0x100000
-DSUS_PortInfo = 0x100001
-DSUC_PadDataReq = 0x100002
-
-maxProtocolVer = 1001
-serverID = 0x12345678
-
 lastRequestTime = nil
 lastRequestIP = nil
 lastRequestPORT = nil

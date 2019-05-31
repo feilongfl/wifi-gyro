@@ -2,7 +2,6 @@
 dofile("config.lua")
 dofile("log.lua")
 dofile("compile.lua")
-checkCompileConfig()
 
 runlua("buffer")
 runlua("wifi")
