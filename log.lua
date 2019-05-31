@@ -7,6 +7,6 @@ end
 ta = tmr.now()
 function timeDebug(msg)
     tb = tmr.now()
-    print(string.format("[time][%s][%d] -> %d", msg, tb - ta, tb))
+    print(string.format("[time][%s][%d] -> %dus", msg, tb, tb - ta))
     ta = tmr.now()
 end

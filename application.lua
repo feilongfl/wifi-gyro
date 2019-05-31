@@ -35,16 +35,26 @@ function setStr(data, offset, val)
     return str
 end
 
+function newArray(size)
+    local t = {}
+    setmetatable(t, {
+           __index = function (_, i) 
+               return i >= 1 and i <= size and i or nil end})
+    return t
+end
+
 function sendReq(reqdata, s, port, ip)
     -- protocal start
     -- timeDebug("3")
-    local t = {"D", "S", "U", "S"}; -- head
-    for k, v in pairs(writeUInt16LE(maxProtocolVer)) do t[#t + 1] = v; end -- ver
-    for k, v in pairs(writeUInt16LE(#reqdata)) do t[#t + 1] = v; end -- length
-    for k, v in pairs(writeUInt32LE(0x00000000)) do t[#t + 1] = v; end -- index
-    for k, v in pairs(writeUInt32LE(serverID)) do t[#t + 1] = v; end -- id
-    for k,v in pairs(reqdata) do -- data
-        t[#t + 1] = v
+    local t = newArray(#reqdata + 16)
+    local ti = 1
+    for k, v in pairs({"D", "S", "U", "S"}) do t[ti] = v; ti = ti + 1 end -- ver
+    for k, v in pairs(writeUInt16LE(maxProtocolVer)) do t[ti] = v; ti = ti + 1 end -- ver
+    for k, v in pairs(writeUInt16LE(#reqdata)) do t[ti] = v; ti = ti + 1 end -- length
+    for k, v in pairs(writeUInt32LE(0x00000000)) do t[ti] = v; ti = ti + 1 end -- index
+    for k, v in pairs(writeUInt32LE(serverID)) do t[ti] = v; ti = ti + 1 end -- id
+    for k, v in pairs(reqdata) do -- data
+        t[ti] = v; ti = ti + 1
     end
     -- timeDebug("4")
     local str = ByteTableToString(t)
@@ -68,8 +78,6 @@ function sendReq(reqdata, s, port, ip)
     end
     -- timeDebug("8")
 end
-
-reqTable = {}
 
 function decodeData(data, s, port, ip)
     -- print("recv[",data,"] from [",ip,":",port,"]")
@@ -100,17 +108,18 @@ function decodeData(data, s, port, ip)
             index = index + 4;
             --print("debuggg ---> ", numOfPadRequests)
             --for i = 1,numOfPadRequests do
-                reqTable = writeUInt32LE(DSUS_PortInfo);
-                reqTable[#reqTable + 1] = 0x00; -- pad id
-                reqTable[#reqTable + 1] = 0x02; -- state (connected)
-                reqTable[#reqTable + 1] = 0x02; -- model (generic)
-                reqTable[#reqTable + 1] = 0x01; -- connection type (usb)
+                local reqTable = writeUInt32LE(DSUS_PortInfo);
+                local reqTableIndex = #reqTable + 1
+                reqTable[reqTableIndex] = 0x00; reqTableIndex = reqTableIndex + 1 -- pad id
+                reqTable[reqTableIndex] = 0x02; reqTableIndex = reqTableIndex + 1 -- state (connected)
+                reqTable[reqTableIndex] = 0x02; reqTableIndex = reqTableIndex + 1 -- model (generic)
+                reqTable[reqTableIndex] = 0x01; reqTableIndex = reqTableIndex + 1 -- connection type (usb)
                 for i = 1,5 do -- mac address
-                    reqTable[#reqTable + 1] = 0x00; 
+                    reqTable[reqTableIndex] = 0x00; reqTableIndex = reqTableIndex + 1 
                 end
-                reqTable[#reqTable + 1] = 0xff; -- mac 00:00:00:00:00:FF
-                reqTable[#reqTable + 1] = 0xef; -- battery (charged)
-                reqTable[#reqTable + 1] = 0x01; -- is active (true)
+                reqTable[reqTableIndex] = 0xff; reqTableIndex = reqTableIndex + 1 -- mac 00:00:00:00:00:FF
+                reqTable[reqTableIndex] = 0xef; reqTableIndex = reqTableIndex + 1 -- battery (charged)
+                reqTable[reqTableIndex] = 0x01; reqTableIndex = reqTableIndex + 1 -- is active (true)
                 
                 sendReq(reqTable, s, port, ip);
             --end
