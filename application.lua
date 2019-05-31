@@ -19,12 +19,6 @@ function onUDPRecv(s, data, port, ip)
     decodeData(data, s, port, ip);
 end
 
-function debugMsg(msg)
-    if DEBUGMSG == true then
-        print(msg);
-    end
-end
-
 function setStr(data, offset, val)
     local t = {};
     local str = "";
@@ -138,7 +132,7 @@ function decodeData(data, s, port, ip)
         msgType = readUInt32LE(data, index);
         index = index + 4;
         if msgType == DSUC_VersionReq then
-            debugMsg("version req is ignore!");
+            Log(1, "version req is ignore!");
             return nil;
         elseif msgType == DSUS_PortInfo then
             numOfPadRequests = readUInt32LE(data, index);
@@ -160,7 +154,7 @@ function decodeData(data, s, port, ip)
                 sendReq(reqTable, s, port, ip);
             --end
         elseif msgType == DSUC_PadDataReq then
-            debugMsg("pad data req");
+            Log(1, "pad data req");
             flags = string.byte(data, index);
             index = index + 1;
             idToRRegister = string.byte(data, index);
@@ -177,11 +171,11 @@ function decodeData(data, s, port, ip)
     end
 end
 
-print("init server at port => "..PORT.."...")
+Log(2, "init server at port => "..PORT.."...")
 if udpSocket == nil then
     udpSocket = net.createUDPSocket()
     udpSocket:listen(PORT)
 end
 udpSocket:on("receive", onUDPRecv)
 port, ip = udpSocket:getaddr()
-print(string.format("local UDP socket address / port: %s:%d", ip, PORT))
+Log(2, string.format("local UDP socket address / port: %s:%d", ip, PORT))

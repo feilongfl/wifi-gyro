@@ -32,10 +32,14 @@ function table_insert_byte(t, v)
     t[#t + 1] = string.char(v)
 end
 
+-- function ByteTableToString(t)
+--     local tt = {}
+--     for _,v in pairs(t) do 
+--         tt[#tt + 1] = string.char(v)
+--     end
+--     return table.concat(tt)
+-- end
+
 function ByteTableToString(t)
-    local tt = {}
-    for _,v in pairs(t) do 
-        tt[#tt + 1] = string.char(v)
-    end
-    return table.concat(tt)
+    return string.char(table.unpack(t))
 end

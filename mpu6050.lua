@@ -4,7 +4,7 @@ mpu6050.setup()
 
 function readMpu()
     local ax,ay,az,temp,gx,gy,gz = mpu6050.read()
-    print(string.format(
+    Log(1, string.format(
             "ax = %d, ay = %d, az = %d, temp = %d, gx = %d, gy = %d, gz = %d", 
             ax, ay, az, temp, gx, gy, gz))
             
@@ -19,7 +19,7 @@ function sendmpu()
     --         "ax = %d, ay = %d, az = %d, temp = %d, gx = %d, gy = %d, gz = %d", 
     --         ax, ay, az, temp, gx, gy, gz))
     -- print("--------")
-    timeDebug("mpu6050")
+    -- timeDebug("mpu6050")
     reqTable = writeUInt32LE(DSUC_PadDataReq);
     reqTable[#reqTable + 1] = 0x00; -- pad id
     reqTable[#reqTable + 1] = 0x02; -- state (connected)
@@ -58,4 +58,4 @@ end
 if mputimer == nil then 
     mputimer = tmr.create()
 end
-mputimer:alarm(1, tmr.ALARM_SEMI, sendmpu)
+mputimer:alarm(10, tmr.ALARM_SEMI, sendmpu)
