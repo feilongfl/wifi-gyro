@@ -11,3 +11,4 @@ COMPILELUA = true
 COMPILECHECKFILE = '.compile'
 debugLevelMessage = {'debug', 'info', 'warning', 'error'}
 DEBUGLEVEL = 2
+MaxPointLength = 60

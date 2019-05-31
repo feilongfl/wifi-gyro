@@ -143,7 +143,7 @@ function decodeData(data, s, port, ip)
     end
 end
 
-function makeDataPackage(ax, ay, az, gx, gy, gz)
+function makeDataPackage(ax, ay, az, gx, gy, gz, time)
     local reqTable = writeUInt32LE(DSUC_PadDataReq)
     local reqTableIndex = #reqTable + 1
     reqTable[reqTableIndex] = 0x00
@@ -182,7 +182,7 @@ function makeDataPackage(ax, ay, az, gx, gy, gz)
         reqTableIndex = reqTableIndex + 1
     end -- unknow
     Log(1, string.format("tmr at [%d]", reqTableIndex))
-    for k, v in pairs(writeUInt32LE(tmr.now())) do
+    for k, v in pairs(writeUInt32LE(time)) do
         reqTable[reqTableIndex] = v
         reqTableIndex = reqTableIndex + 1
     end
@@ -220,9 +220,9 @@ function makeDataPackage(ax, ay, az, gx, gy, gz)
     return reqTable
 end
 
-function genDataPackage(ax, ay, az, gx, gy, gz)
+function genDataPackage(ax, ay, az, gx, gy, gz, time)
     if #cacheData == 0 then
-        cacheData = makeDataPackage(ax, ay, az, gx, gy, gz)
+        cacheData = makeDataPackage(ax, ay, az, gx, gy, gz, time)
     else
         -- package number
         local index = 17
@@ -232,7 +232,7 @@ function genDataPackage(ax, ay, az, gx, gy, gz)
         end
         -- time
         index = 53
-        for k, v in pairs(writeUInt32LE(tmr.now())) do
+        for k, v in pairs(writeUInt32LE(time)) do
             cacheData[index] = v
             index = index + 1
         end
@@ -270,13 +270,14 @@ function genDataPackage(ax, ay, az, gx, gy, gz)
 end
 
 function sendmpu()
+    local time = tmr.now()
     local ax, ay, az, gx, gy, gz = readMpu()
     -- print(string.format(
     --         "ax = %d, ay = %d, az = %d, temp = %d, gx = %d, gy = %d, gz = %d", 
     --         ax, ay, az, temp, gx, gy, gz))
     -- timeDebug("mpu6050")
-
-    genDataPackage(ax, ay, az, gx, gy, gz)
+    LogPoint()
+    genDataPackage(ax, ay, az, gx, gy, gz, time)
     sendReq(cacheData, lastRequestSockets, lastRequestPORT, lastRequestIP)
     mputimer:start()
 end

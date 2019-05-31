@@ -11,3 +11,14 @@ function timeDebug(msg)
     print(string.format("[time][%s][%d] -> %dus", msg, tb, tb - ta))
     ta = tmr.now()
 end
+
+pointIndex = 1
+function LogPoint()
+    if pointIndex == MaxPointLength then
+        print(".")
+        pointIndex = 0;
+    else
+        uart.write(0, ".")
+        pointIndex = pointIndex + 1
+    end
+end
