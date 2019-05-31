@@ -16,6 +16,7 @@ cacheData = {}
 function makeReqPackage(length, crc)
     local t = {}
     local ti = 1
+
     for k, v in pairs({"D", "S", "U", "S"}) do
         t[ti] = v
         ti = ti + 1
@@ -36,11 +37,6 @@ function makeReqPackage(length, crc)
         t[ti] = v
         ti = ti + 1
     end -- id
-
-    -- for k, v in pairs(reqdata) do -- data
-    --     t[ti] = v
-    --     ti = ti + 1
-    -- end
 
     return t
 end
@@ -64,29 +60,13 @@ end
 
 function sendReq(reqdata, s, port, ip)
     -- protocal start
-    -- timeDebug("3")
     genReqPackage(#reqdata, 0)
 
-    -- timeDebug("4")
     local str = ByteTableToString(cacheReq)..ByteTableToString(reqdata)
-    -- timeDebug("5")
-    -- print("-------------------------------")
-    -- print("crc[",str,"](", #reqdata, ",", #t, ",", #str,") to [",ip,":",port,"]")
     genReqPackage(#reqdata, crc32.hash(str))
 
-    -- for k, v in pairs(writeUInt32LE(crc32.hash(str))) do -- crc
-        --  print(k, string.format("%X",v))
-        -- t[k + 8] = v
-        -- crc[#crc + 1] = string.char(v)
-    -- end
-    -- timeDebug("6")
-    -- protocal fin
-    -- str = replace_char(9, str, table.concat(crc))
     str = ByteTableToString(cacheReq)..ByteTableToString(reqdata)
-    -- print("send[",str,"](", #reqdata, ",", #t, ",", #str,") to [",ip,":",port,"]")
-    -- timeDebug("7")
-    if ip ~= nil and disconnect_ct ~= nil then s:send(port, ip, str) end
-    -- timeDebug("8")
+    if ip ~= nil and disconnect_ct == nil then s:send(port, ip, str) end
 end
 
 function makeInfoPackage()
@@ -109,7 +89,6 @@ function makeInfoPackage()
     reqTable[reqTableIndex] = 0xef
     reqTableIndex = reqTableIndex + 1 -- battery (charged)
     reqTable[reqTableIndex] = 0x01
-    -- reqTableIndex = reqTableIndex + 1 -- is active (true)
 
     return reqTable
 end
@@ -119,25 +98,21 @@ function genInfoPackage()
 end
 
 function decodeData(data, s, port, ip)
-    -- print("recv[",data,"] from [",ip,":",port,"]")
     if string.sub(data, 0, 4) == "DSUC" then
         lastData = data
         index = 5
-        protocolVer = readUInt16LE(data, index)
+        -- protocolVer = readUInt16LE(data, index)
         index = index + 2
-        packetSize = readUInt16LE(data, index)
+        -- local packetSize = readUInt16LE(data, index)
         index = index + 2
-        receivedCrc = readUInt32LE(data, index)
-        -- checkcrc
-        -- print(receivedCrc)
-        setStr(data, index, {0x00, 0x00, 0x00, 0x00})
+        -- receivedCrc = readUInt32LE(data, index)
+        -- setStr(data, index, {0x00, 0x00, 0x00, 0x00}) -- ignore crc check to save time
         -- print(crc32.hash(data))
         index = index + 4
-
-        -- checkcrc
-        clientId = readUInt32LE(data, index)
+        -- todo: checkcrc here
+        -- clientId = readUInt32LE(data, index)
         index = index + 4
-        msgType = readUInt32LE(data, index)
+        local msgType = readUInt32LE(data, index)
         index = index + 4
         if msgType == DSUC_VersionReq then
             Log(1, "version req is ignore!")
@@ -151,13 +126,13 @@ function decodeData(data, s, port, ip)
             sendReq(cacheInfo, s, port, ip)
             -- end
         elseif msgType == DSUC_PadDataReq then
-            Log(1, "pad data req")
-            flags = string.byte(data, index)
-            index = index + 1
-            idToRRegister = string.byte(data, index)
-            index = index + 1
-            macToRegister = {string.byte(data, index, index + 5)}
-            index = index + 6
+            Log(1, "pad data req ignore") -- ignored
+            -- flags = string.byte(data, index)
+            -- index = index + 1
+            -- idToRRegister = string.byte(data, index)
+            -- index = index + 1
+            -- macToRegister = {string.byte(data, index, index + 5)}
+            -- index = index + 6
         else
             return nil -- drop unknown req
         end
@@ -299,15 +274,10 @@ function sendmpu()
     -- print(string.format(
     --         "ax = %d, ay = %d, az = %d, temp = %d, gx = %d, gy = %d, gz = %d", 
     --         ax, ay, az, temp, gx, gy, gz))
-    -- print("--------")
     timeDebug("mpu6050")
 
-    -- reqTable = makeDataPackage(ax, ay, az, gx, gy, gz)
-    -- timeDebug("1")
-    -- sendReq(reqTable, lastRequestSockets, lastRequestPORT, lastRequestIP)
     genDataPackage(ax, ay, az, gx, gy, gz)
     sendReq(cacheData, lastRequestSockets, lastRequestPORT, lastRequestIP)
-    -- timeDebug("2")
     mputimer:start()
 end
 
