@@ -62,10 +62,10 @@ function sendReq(reqdata, s, port, ip)
     -- protocal start
     genReqPackage(#reqdata, 0)
 
-    local str = ByteTableToString(cacheReq)..ByteTableToString(reqdata)
+    local str = ByteTableToString(cacheReq) .. ByteTableToString(reqdata)
     genReqPackage(#reqdata, crc32.hash(str))
 
-    str = ByteTableToString(cacheReq)..ByteTableToString(reqdata)
+    str = ByteTableToString(cacheReq) .. ByteTableToString(reqdata)
     if ip ~= nil and disconnect_ct == nil then s:send(port, ip, str) end
 end
 
@@ -192,27 +192,27 @@ function makeDataPackage(ax, ay, az, gx, gy, gz)
     end -- unknow
 
     Log(1, string.format("data at [%d]", reqTableIndex))
-    for k, v in pairs(writeFloatLE(ax / 32763)) do
+    for k, v in pairs(writeFloatLE(ax)) do
         reqTable[reqTableIndex] = v
         reqTableIndex = reqTableIndex + 1
     end
-    for k, v in pairs(writeFloatLE(ay / 32763)) do
+    for k, v in pairs(writeFloatLE(ay)) do
         reqTable[reqTableIndex] = v
         reqTableIndex = reqTableIndex + 1
     end
-    for k, v in pairs(writeFloatLE(az / 32763)) do
+    for k, v in pairs(writeFloatLE(az)) do
         reqTable[reqTableIndex] = v
         reqTableIndex = reqTableIndex + 1
     end
-    for k, v in pairs(writeFloatLE(gx / 32763)) do
+    for k, v in pairs(writeFloatLE(gx)) do
         reqTable[reqTableIndex] = v
         reqTableIndex = reqTableIndex + 1
     end
-    for k, v in pairs(writeFloatLE(gy / 32763)) do
+    for k, v in pairs(writeFloatLE(gy)) do
         reqTable[reqTableIndex] = v
         reqTableIndex = reqTableIndex + 1
     end
-    for k, v in pairs(writeFloatLE(gz / 32763)) do
+    for k, v in pairs(writeFloatLE(gz)) do
         reqTable[reqTableIndex] = v
         reqTableIndex = reqTableIndex + 1
     end
@@ -239,27 +239,27 @@ function genDataPackage(ax, ay, az, gx, gy, gz)
 
         -- data
         index = 61
-        for k, v in pairs(writeFloatLE(ax / 32763)) do
+        for k, v in pairs(writeFloatLE(ax)) do
             cacheData[index] = v
             index = index + 1
         end
-        for k, v in pairs(writeFloatLE(ay / 32763)) do
+        for k, v in pairs(writeFloatLE(ay)) do
             cacheData[index] = v
             index = index + 1
         end
-        for k, v in pairs(writeFloatLE(az / 32763)) do
+        for k, v in pairs(writeFloatLE(az)) do
             cacheData[index] = v
             index = index + 1
         end
-        for k, v in pairs(writeFloatLE(gx / 32763)) do
+        for k, v in pairs(writeFloatLE(gx)) do
             cacheData[index] = v
             index = index + 1
         end
-        for k, v in pairs(writeFloatLE(gy / 32763)) do
+        for k, v in pairs(writeFloatLE(gy)) do
             cacheData[index] = v
             index = index + 1
         end
-        for k, v in pairs(writeFloatLE(gz / 32763)) do
+        for k, v in pairs(writeFloatLE(gz)) do
             cacheData[index] = v
             index = index + 1
         end
@@ -270,11 +270,11 @@ function genDataPackage(ax, ay, az, gx, gy, gz)
 end
 
 function sendmpu()
-    local ax, ay, az, temp, gx, gy, gz = mpu6050.read()
+    local ax, ay, az, gx, gy, gz = readMpu()
     -- print(string.format(
     --         "ax = %d, ay = %d, az = %d, temp = %d, gx = %d, gy = %d, gz = %d", 
     --         ax, ay, az, temp, gx, gy, gz))
-    timeDebug("mpu6050")
+    -- timeDebug("mpu6050")
 
     genDataPackage(ax, ay, az, gx, gy, gz)
     sendReq(cacheData, lastRequestSockets, lastRequestPORT, lastRequestIP)
