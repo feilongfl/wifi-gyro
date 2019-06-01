@@ -5,20 +5,26 @@ function Log(level, msg)
     end
 end
 
-ta = tmr.now()
-function timeDebug(msg)
-    tb = tmr.now()
-    print(string.format("[time][%s][%d] -> %dus", msg, tb, tb - ta))
-    ta = tmr.now()
-end
-
 pointIndex = 1
 function LogPoint()
     if pointIndex == MaxPointLength then
         print(".")
-        pointIndex = 0;
+        pointIndex = 1
     else
         uart.write(0, ".")
         pointIndex = pointIndex + 1
     end
 end
+
+
+ta = tmr.now()
+function timeDebug(msg)
+    tb = tmr.now()
+    if TIMEDEBUG then
+        print(string.format("[time][%s][%d] -> %dus", msg, tb, tb - ta))
+    else
+        LogPoint()
+    end
+    ta = tmr.now()
+end
+

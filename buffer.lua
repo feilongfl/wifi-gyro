@@ -41,8 +41,8 @@ end
 -- end
 
 function ByteTableToString(t)
-    -- return string.char(table.unpack(t))
-    return table.serial(t)
+    return string.char(unpack(t))
+    -- return table.serial(t)
 end
 
 function setStr(data, offset, val)

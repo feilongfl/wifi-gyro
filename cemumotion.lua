@@ -17,7 +17,8 @@ function makeReqPackage(length, crc)
     local t = {}
     local ti = 1
 
-    for k, v in pairs({"D", "S", "U", "S"}) do
+    -- for k, v in pairs({"D", "S", "U", "S"}) do
+    for k, v in pairs({0x44, 0x53, 0x55, 0x53}) do
         t[ti] = v
         ti = ti + 1
     end -- ver
@@ -275,8 +276,8 @@ function sendmpu()
     -- print(string.format(
     --         "ax = %d, ay = %d, az = %d, temp = %d, gx = %d, gy = %d, gz = %d", 
     --         ax, ay, az, temp, gx, gy, gz))
-    -- timeDebug("mpu6050")
-    LogPoint()
+    timeDebug("mpu6050")
+    -- LogPoint()
     genDataPackage(ax, ay, az, gx, gy, gz, time)
     sendReq(cacheData, lastRequestSockets, lastRequestPORT, lastRequestIP)
     mputimer:start()
